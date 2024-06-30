@@ -11,7 +11,7 @@ namespace Mango.Services.ProductAPI.Controllers;
 
 [ApiController]
 [Route("api/products")]
-[Authorize]
+// [Authorize]
 public class ProductController : ControllerBase
 {
     private readonly AppDbContext _dbContext;

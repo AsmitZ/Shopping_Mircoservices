@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Mango.Web.Models;
 
 public class ProductDto
@@ -8,4 +10,5 @@ public class ProductDto
     public string Description { get; set; }
     public string ImageURL { get; set; }
     public string Category { get; set; }
+    [Range(0, 100)] public int Count { get; set; } = 1;
 }
