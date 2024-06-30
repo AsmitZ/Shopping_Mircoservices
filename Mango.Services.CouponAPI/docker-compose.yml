@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  sql_server:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: mssql_server
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Test123!"
+    ports:
+      - "1433:1433"
+    volumes:
+      - ~/qmap/data/mssql:/var/opt/mssql
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - "8080:8080"

@@ -1,0 +1,9 @@
+@Mango.Services.CouponAPI_HostAddress = http://localhost:5209
+
+GET {{Mango.Services.CouponAPI_HostAddress}}/api/CouponApi
+Accept: application/json
+
+###
+
+GET {{Mango.Services.CouponAPI_HostAddress}}/api/CouponApi/1
+Accept: application/json
