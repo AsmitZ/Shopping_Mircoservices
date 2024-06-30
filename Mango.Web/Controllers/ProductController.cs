@@ -113,7 +113,30 @@ public class ProductController : Controller
     {
         try
         {
-            var response = await _productService.DeleteProductAsync(productId);
+            var response = await _productService.GetProductByIdAsync(productId);
+            if (response != null && response.IsSuccess)
+            {
+                var productDto = JsonConvert.DeserializeObject<ProductDto>(
+                    Convert.ToString(response.Result) ?? string.Empty);
+                return View(productDto);
+            }
+            TempData["Error"] = response?.Message;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            TempData["Error"] = e.Message;
+        }
+        
+        return RedirectToAction(nameof(ProductIndex));
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> ProductDelete(ProductDto productDto)
+    {
+        try
+        {
+            var response = await _productService.DeleteProductAsync(productDto.ProductId);
             if (response != null && response.IsSuccess)
             {
                 Console.WriteLine("Product deleted successfully.");
