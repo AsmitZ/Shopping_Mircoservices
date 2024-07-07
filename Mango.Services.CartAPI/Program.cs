@@ -2,6 +2,8 @@ using AutoMapper;
 using Mango.Services.CartAPI;
 using Mango.Services.CartAPI.Data;
 using Mango.Services.CartAPI.Extensions;
+using Mango.Services.CartAPI.Services;
+using Mango.Services.CartAPI.Services.IServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -24,9 +26,21 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.AddAppAuthentication();
 builder.Services.AddAuthorization();
 
+builder.Services.AddHttpClient("ProductAPI", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]);
+});
+builder.Services.AddHttpClient("CouponAPI", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CouponAPI"]);
+});
+
 IMapper mapper = MapperConfig.RegisterMappings().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
