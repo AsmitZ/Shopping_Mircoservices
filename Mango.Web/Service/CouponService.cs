@@ -18,7 +18,7 @@ public class CouponService : ICouponService
         return await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.GET,
-            Url = SD.CouponApiBase + "api/CouponApi"
+            Url = SD.CouponApiBase + "api/coupons"
         });
     }
 
@@ -27,7 +27,7 @@ public class CouponService : ICouponService
         return await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.GET,
-            Url = SD.CouponApiBase + "api/CouponApi/" + couponCode
+            Url = SD.CouponApiBase + "api/coupons/" + couponCode
         });
     }
 
@@ -36,7 +36,7 @@ public class CouponService : ICouponService
         return await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.GET,
-            Url = SD.CouponApiBase + "api/CouponApi/" + couponId
+            Url = SD.CouponApiBase + "api/coupons/" + couponId
         });
     }
 
@@ -45,7 +45,7 @@ public class CouponService : ICouponService
         return await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.DELETE,
-            Url = SD.CouponApiBase + "api/CouponApi/" + couponId
+            Url = SD.CouponApiBase + "api/coupons/" + couponId
         });
     }
 
@@ -54,7 +54,7 @@ public class CouponService : ICouponService
         return await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.POST,
-            Url = SD.CouponApiBase + "api/CouponApi",
+            Url = SD.CouponApiBase + "api/coupons",
             Data = couponDto
         });
     }
@@ -64,7 +64,7 @@ public class CouponService : ICouponService
         return await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.PUT,
-            Url = SD.CouponApiBase + "api/CouponApi",
+            Url = SD.CouponApiBase + "api/coupons",
             Data = couponDto
         });
     }
