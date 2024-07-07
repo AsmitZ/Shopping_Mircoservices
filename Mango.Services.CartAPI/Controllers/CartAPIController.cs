@@ -2,6 +2,7 @@ using AutoMapper;
 using Mango.Services.CartAPI.Data;
 using Mango.Services.CartAPI.Models;
 using Mango.Services.CartAPI.Models.Dto;
+using Mango.Services.CartAPI.Services.IServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,12 +14,16 @@ public class CartAPIController : ControllerBase
 {
     private readonly IMapper _mapper;
     private readonly AppDbContext _db;
+    private readonly IProductService _productService;
+    private readonly ICouponService _couponService;
     private ResponseDto _response;
 
-    public CartAPIController(IMapper mapper, AppDbContext db)
+    public CartAPIController(IMapper mapper, AppDbContext db, IProductService productService, ICouponService couponService)
     {
         _mapper = mapper;
         _db = db;
+        _productService = productService;
+        _couponService = couponService;
         _response = new ResponseDto();
     }
 
@@ -38,8 +43,23 @@ public class CartAPIController : ControllerBase
             var cartHeaderDto = _mapper.Map<CartHeaderDto>(cartHeader);
             var cartDetails = await _db.CartDetails.Where(x => x.CartHeaderId == cartHeader.CartHeaderId).ToListAsync();
             var cartDetailsDto = _mapper.Map<List<CartDetailsDto>>(cartDetails);
-            // get product details here
-            cartHeader.CartTotal = (double)cartDetails.Sum(cart => cart.Count * cart.Product.Price);
+            var products = await _productService.GetProducts();
+
+            cartDetailsDto.ForEach(cartDetail =>
+                cartDetail.Product = products.FirstOrDefault(x => x.ProductId == cartDetail.ProductId));
+            
+            cartHeaderDto.CartTotal = (double)cartDetailsDto.Sum(cart => cart.Count * cart.Product.Price);
+
+            if (!string.IsNullOrWhiteSpace(cartHeaderDto.CouponCode))
+            {
+                var couponDto = await _couponService.GetCoupon(cartHeaderDto.CouponCode);
+                if (couponDto is not null && cartHeaderDto.CartTotal > couponDto.MinAmount)
+                {
+                    cartHeaderDto.CartTotal -= couponDto.DiscountAmount;
+                    cartHeaderDto.Discount = couponDto.DiscountAmount;
+                }
+            }
+
             var cartDto = new CartDto { CartHeader = cartHeaderDto, CartDetails = cartDetailsDto };
             
             _response.Result = cartDto;
@@ -135,6 +155,41 @@ public class CartAPIController : ControllerBase
             _response.IsSuccess = false;
             _response.Message = e.Message ;
         }
+        return _response;
+    }
+
+    [HttpPut("ApplyCoupon/{userId}")]
+    public async Task<ActionResult<ResponseDto>> ApplyCoupon([FromRoute]string userId, string couponCode)
+    {
+        var cartFromDb = await _db.CartHeaders.FirstAsync(cart => cart.UserId == userId);
+        if (cartFromDb is null)
+        {
+            return BadRequest("Unable to find shopping cart");
+        }
+
+        cartFromDb.CouponCode = couponCode;
+        _db.CartHeaders.Update(cartFromDb);
+        await _db.SaveChangesAsync();
+        
+        _response.Message = "Coupon applied successfully";
+        _response.Result = cartFromDb;
+        return _response;
+    }
+    
+    [HttpPut("RemoveCoupon/{userId}")]
+    public async Task<ActionResult<ResponseDto>> RemoveCoupon([FromRoute] string userId)
+    {
+        var cartFromDb = await _db.CartHeaders.FirstAsync(cart => cart.UserId == userId);
+        if (cartFromDb is null)
+        {
+            return BadRequest("Unable to find shopping cart");
+        }
+
+        cartFromDb.CouponCode = "";
+        _db.CartHeaders.Update(cartFromDb);
+        await _db.SaveChangesAsync();
+        
+        _response.Message = "Coupon removed successfully";
         return _response;
     }
 }
