@@ -19,7 +19,7 @@ public class CartService : ICartService
         return await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.GET,
-            Url = SD.ShoppingCartApiBase + "api/cart/GetCart" + userId
+            Url = SD.ShoppingCartApiBase + "api/cart/GetCart/" + userId
         });
     }
 
@@ -27,7 +27,7 @@ public class CartService : ICartService
     {
         return await _baseService.SendAsync(new RequestDto
         {
-            ApiType = ApiType.GET,
+            ApiType = ApiType.POST,
             Data = cartDto,
             Url = SD.ShoppingCartApiBase + "api/cart/CartUpsert"
         });
