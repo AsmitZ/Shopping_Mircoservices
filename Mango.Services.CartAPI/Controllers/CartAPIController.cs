@@ -128,7 +128,7 @@ public class CartAPIController : ControllerBase
         return _response;
     }
     
-    [HttpPost("RemoveCart")]
+    [HttpPost("RemoveCart/{cartDetailId}")]
     public async Task<ActionResult<ResponseDto>> RemoveCart(int cartDetailId)
     {
         try
@@ -158,8 +158,8 @@ public class CartAPIController : ControllerBase
         return _response;
     }
 
-    [HttpPut("ApplyCoupon/{userId}")]
-    public async Task<ActionResult<ResponseDto>> ApplyCoupon([FromRoute]string userId, string couponCode)
+    [HttpPut("ApplyCoupon/{userId}/{couponCode}")]
+    public async Task<ActionResult<ResponseDto>> ApplyCoupon([FromRoute]string userId, [FromRoute]string couponCode)
     {
         var cartFromDb = await _db.CartHeaders.FirstAsync(cart => cart.UserId == userId);
         if (cartFromDb is null)

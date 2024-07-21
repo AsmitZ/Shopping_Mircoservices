@@ -62,13 +62,15 @@
                         @if (string.IsNullOrEmpty(Model.CartHeader.CouponCode))
                         {
                         <span>Coupon:</span>
-                        <input asp-for="CartHeader.CouponCode" />
+                        <input asp-for="CartHeader.CouponCode" name="couponCode"/>
+                        <input type="hidden" asp-for="CartHeader.UserId" name="userId"/>
                         <button type="submit" asp-action="ApplyCoupon" class="btn btn-sm btn-success"> Apply </button>
                         }
                         else
                         {
                         <span>Coupon:</span>
                         <input asp-for="CartHeader.CouponCode" disabled/>
+                        <input type="hidden" asp-for="CartHeader.UserId" name="userId"/>
                         <button type="submit" asp-action="RemoveCoupon" class="btn btn-sm btn-success"> Remove </button>
                         }
                     </div>

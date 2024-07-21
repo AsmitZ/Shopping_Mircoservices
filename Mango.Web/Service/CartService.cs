@@ -38,8 +38,7 @@ public class CartService : ICartService
         return await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.POST,
-            Data = cartDetailsId,
-            Url = SD.ShoppingCartApiBase + "api/cart/RemoveCart"
+            Url = SD.ShoppingCartApiBase + "api/cart/RemoveCart/" + cartDetailsId
         });
     }
 
@@ -48,8 +47,16 @@ public class CartService : ICartService
         return await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.PUT,
-            Data = couponCode,
-            Url = SD.ShoppingCartApiBase + "api/cart/ApplyCoupon/" + userId
+            Url = SD.ShoppingCartApiBase + "api/cart/ApplyCoupon/" + userId + "/" + couponCode
+        });
+    }
+    
+    public async Task<ResponseDto?> RemoveCouponAsync(string userId)
+    {
+        return await _baseService.SendAsync(new RequestDto
+        {
+            ApiType = ApiType.PUT,
+            Url = SD.ShoppingCartApiBase + "api/cart/RemoveCoupon/" + userId
         });
     }
 }

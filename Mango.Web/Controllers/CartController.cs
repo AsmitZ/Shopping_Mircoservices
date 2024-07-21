@@ -22,6 +22,44 @@ public class CartController : Controller
         return View(await LoadCartDtoBasedOnLoggedInUser());
     }
 
+    public async Task<IActionResult> Remove(int cartDetailsId)
+    {
+        var response = await _cartService.RemoveFromCartAsync(cartDetailsId);
+        if (response != null && response.IsSuccess)
+        {
+            TempData["success"] = "Cart updated successfully";
+            return RedirectToAction(nameof(CartIndex));
+        }
+
+        return View();
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> ApplyCoupon(string userId, string couponCode)
+    {
+        var response = await _cartService.ApplyCouponAsync(userId, couponCode);
+        if (response != null && response.IsSuccess)
+        {
+            TempData["success"] = "Cart updated successfully";
+            return RedirectToAction(nameof(CartIndex));
+        }
+
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RemoveCoupon(string userId)
+    {
+        var response = await _cartService.RemoveCouponAsync(userId);
+        if (response != null && response.IsSuccess)
+        {
+            TempData["success"] = "Cart updated successfully";
+            return RedirectToAction(nameof(CartIndex));
+        }
+
+        return View();
+    }
+
     private async Task<CartDto> LoadCartDtoBasedOnLoggedInUser()
     {
         var userId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value;
