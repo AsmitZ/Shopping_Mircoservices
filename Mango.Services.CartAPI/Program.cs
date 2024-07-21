@@ -4,6 +4,7 @@ using Mango.Services.CartAPI.Data;
 using Mango.Services.CartAPI.Extensions;
 using Mango.Services.CartAPI.Services;
 using Mango.Services.CartAPI.Services.IServices;
+using Mango.Services.CartAPI.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -25,15 +26,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.AddAppAuthentication();
 builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<BackendApiAuthenticationHttpClientHandler>();
 
-builder.Services.AddHttpClient("ProductAPI", client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]);
-});
-builder.Services.AddHttpClient("CouponAPI", client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CouponAPI"]);
-});
+builder.Services.AddHttpClient("ProductAPI",
+        client => client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]))
+    .AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
+
+builder.Services
+    .AddHttpClient("CouponAPI", 
+        client => client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CouponAPI"]))
+    .AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
 
 IMapper mapper = MapperConfig.RegisterMappings().CreateMapper();
 builder.Services.AddSingleton(mapper);
