@@ -13,4 +13,6 @@ public interface ICartService
     Task<ResponseDto?> ApplyCouponAsync(string userId, string couponsCode);
 
     Task<ResponseDto?> RemoveCouponAsync(string userId);
+    
+    Task<ResponseDto?> EmailCartAsync(CartDto cartDto);
 }

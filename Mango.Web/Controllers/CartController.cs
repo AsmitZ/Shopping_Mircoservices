@@ -59,6 +59,38 @@ public class CartController : Controller
 
         return View();
     }
+    
+    [HttpPost]
+    public async Task<IActionResult> EmailCart(CartDto cartDto)
+    {
+        if (cartDto.CartDetails == null || !cartDto.CartDetails.Any())
+        {
+            TempData["error"] = "Cart is empty";
+            return RedirectToAction(nameof(CartIndex));
+        }
+
+        var cartDetails = cartDto.CartDetails.ToList();
+        foreach (var dto in cartDetails)
+        {
+            if (dto.Product?.ImageURL == null)
+            {
+                dto.Product.ImageURL = string.Empty;
+            }
+        }
+
+        var email = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Email)?.FirstOrDefault()?.Value;
+        cartDto.CartHeader.Email = email;
+        
+        var response = await _cartService.EmailCartAsync(cartDto);
+        if (response != null && response.IsSuccess)
+        {
+            TempData["success"] = "Email will be processed and sent shortly";
+            return RedirectToAction(nameof(CartIndex));
+        }
+        
+        TempData["error"] = "Email processing failed";
+        return RedirectToAction(nameof(CartIndex));
+    }
 
     private async Task<CartDto> LoadCartDtoBasedOnLoggedInUser()
     {

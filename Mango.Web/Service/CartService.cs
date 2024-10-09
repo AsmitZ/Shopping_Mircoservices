@@ -59,4 +59,15 @@ public class CartService : ICartService
             Url = SD.ShoppingCartApiBase + "api/cart/RemoveCoupon/" + userId
         });
     }
+
+    public async Task<ResponseDto?> EmailCartAsync(CartDto cartDto)
+    {
+        var responseDto = await _baseService.SendAsync(new RequestDto
+        {
+            ApiType = ApiType.POST,
+            Data = cartDto,
+            Url = SD.ShoppingCartApiBase + "api/cart/EmailCartRequest"
+        });
+        return responseDto;
+    }
 }
