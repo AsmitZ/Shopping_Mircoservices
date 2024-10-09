@@ -48,6 +48,7 @@ public class BaseService : IBaseService
                 HttpStatusCode.NotFound => new ResponseDto { IsSuccess = false, Message = "Not Found" },
                 HttpStatusCode.Forbidden => new ResponseDto { IsSuccess = false, Message = "Access Denied" },
                 HttpStatusCode.Unauthorized => new ResponseDto { IsSuccess = false, Message = "Please Login Again" },
+                HttpStatusCode.BadRequest => new ResponseDto { IsSuccess = false, Message = await responseMessage.Content.ReadAsStringAsync() },
                 _ => JsonConvert.DeserializeObject<ResponseDto>(await responseMessage.Content.ReadAsStringAsync())
             };
         }
