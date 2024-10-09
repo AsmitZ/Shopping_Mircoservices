@@ -1,4 +1,7 @@
 using Mango.Services.EmailAPI.Data;
+using Mango.Services.EmailAPI.Extensions;
+using Mango.Services.EmailAPI.Messaging;
+using MessageBus;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +12,8 @@ builder.Services.AddDbContext<AppDbContext>(option =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     option.UseSqlServer(connectionString);
 });
+builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection("AWSConfig"));
+builder.Services.AddSingleton<IBusMessageReceiver, BusMessageReceiver>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -31,6 +36,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 ApplyMigration();
+
+app.UseAwsListener();
 
 app.Run();
 
