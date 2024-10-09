@@ -5,6 +5,7 @@ using Mango.Services.CartAPI.Extensions;
 using Mango.Services.CartAPI.Services;
 using Mango.Services.CartAPI.Services.IServices;
 using Mango.Services.CartAPI.Utility;
+using MessageBus;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -37,6 +38,17 @@ builder.Services
     .AddHttpClient("CouponAPI", 
         client => client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CouponAPI"]))
     .AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
+
+builder.Services.AddScoped<IMessageBus>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var awsOptions = config.GetSection("AWSConfig").Get<AwsOptions>();
+    if (awsOptions is null)
+    {
+        throw new Exception("AWS Configuration is missing");
+    }
+    return new MessageBus.MessageBus(awsOptions);
+});
 
 IMapper mapper = MapperConfig.RegisterMappings().CreateMapper();
 builder.Services.AddSingleton(mapper);
