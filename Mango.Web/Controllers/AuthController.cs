@@ -109,7 +109,7 @@ public class AuthController : Controller
         var token =  handler.ReadJwtToken(dto.Token);
         var claims = new List<Claim>();
         claims.Add(new Claim(JwtRegisteredClaimNames.Email,
-            token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Name).Value));
+            token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email).Value));
         claims.Add(new Claim(JwtRegisteredClaimNames.Name,
             token.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Name).Value));
         claims.Add(new Claim(JwtRegisteredClaimNames.Sub,
