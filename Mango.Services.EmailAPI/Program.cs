@@ -37,6 +37,7 @@ app.MapControllers();
 
 ApplyMigration();
 
+// Adds a task to listen to messages from AWS queue on start of the application using IApplicationLifetime 
 app.UseAwsListener();
 
 app.Run();
