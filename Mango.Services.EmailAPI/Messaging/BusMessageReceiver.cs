@@ -1,6 +1,9 @@
+using System.Text.Json;
 using Amazon.Runtime;
 using Amazon.SQS;
 using Amazon.SQS.Model;
+using Mango.Services.EmailAPI.Models.Dto;
+using Mango.Services.EmailAPI.Services;
 using MessageBus;
 using Microsoft.Extensions.Options;
 
@@ -9,14 +12,17 @@ namespace Mango.Services.EmailAPI.Messaging;
 public class BusMessageReceiver : IBusMessageReceiver
 {
     private readonly IOptions<AwsOptions> _awsOptions;
+    private readonly IEmailService _emailService;
     private readonly AmazonSQSClient _sqsClient;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private string? _queueUrl;
 
-    public BusMessageReceiver(IOptions<AwsOptions> awsOptions)
+    public BusMessageReceiver(IOptions<AwsOptions> awsOptions, IEmailService emailService)
     {
         ArgumentNullException.ThrowIfNull(awsOptions);
+        ArgumentNullException.ThrowIfNull(emailService);
         _awsOptions = awsOptions;
+        _emailService = emailService;
         _cancellationTokenSource = new CancellationTokenSource();
 
         var basicAwsCredentials = new BasicAWSCredentials(_awsOptions.Value.AccessKey, _awsOptions.Value.SecretKey);
@@ -43,11 +49,19 @@ public class BusMessageReceiver : IBusMessageReceiver
                 {
                     foreach (var message in response.Messages)
                     {
-                        // Process the message (e.g., handle email logic)
-                        Console.WriteLine($"Received message: {message.Body}");
+                        var cartDto = JsonSerializer.Deserialize<CartDto>(message.Body);
+                        if (cartDto == null)
+                        {
+                            Console.WriteLine("Error deserializing the message");
+                            continue;
+                        }
+                        var logEmail = await _emailService.SendAndLogEmail(cartDto);
 
-                        // After processing, delete the message
-                        await _sqsClient.DeleteMessageAsync(_queueUrl, message.ReceiptHandle);
+                        if (logEmail)
+                        {
+                            // After processing, delete the message
+                            await _sqsClient.DeleteMessageAsync(_queueUrl, message.ReceiptHandle);    
+                        }
                     }
                 }
             }

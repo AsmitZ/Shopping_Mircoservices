@@ -1,6 +1,7 @@
 using Mango.Services.EmailAPI.Data;
 using Mango.Services.EmailAPI.Extensions;
 using Mango.Services.EmailAPI.Messaging;
+using Mango.Services.EmailAPI.Services;
 using MessageBus;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,11 @@ builder.Services.AddDbContext<AppDbContext>(option =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     option.UseSqlServer(connectionString);
 });
+
+var optionBuilder = new DbContextOptionsBuilder<AppDbContext>();
+optionBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+builder.Services.AddSingleton<IEmailService>(new EmailService(optionBuilder.Options));
+
 builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection("AWSConfig"));
 builder.Services.AddSingleton<IBusMessageReceiver, BusMessageReceiver>();
 
