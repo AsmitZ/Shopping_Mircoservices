@@ -22,9 +22,9 @@ public class AuthService : IAuthService
         _jwtTokenGenerator = jwtTokenGenerator;
     }
 
-    public async Task<string> Register(RegistrationRequestDto model)
+    public async Task<(string? errorMessage, UserDto? user)> Register(RegistrationRequestDto model)
     {
-        ApplicationUser user = new ApplicationUser()
+        ApplicationUser user = new ApplicationUser
         {
             UserName = model.Email,
             Email = model.Email,
@@ -36,26 +36,27 @@ public class AuthService : IAuthService
         try
         {
             var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                var userToReturn = _db.ApplicationUsers.First(u => u.Email == model.Email);
-
-                var registerUser = new UserDto()
-                {
-                    Id = userToReturn.Id,
-                    Name = userToReturn.Name,
-                    Email = userToReturn.Email,
-                    PhoneNumber = userToReturn.PhoneNumber
-                };
-                return "";
+                return (result.Errors.First().Description, null);
             }
+            
+            var userToReturn = _db.ApplicationUsers.First(u => u.Email == model.Email);
 
-            return result.Errors.First().Description;
+            var registeredUser = new UserDto
+            {
+                Id = userToReturn.Id,
+                Name = userToReturn.Name,
+                Email = userToReturn.Email,
+                PhoneNumber = userToReturn.PhoneNumber
+            };
+            return (string.Empty, registeredUser);
+
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return "Error occurred while registering the user";
+            return ("Error occurred while registering the user", null);
         }
     }
 
