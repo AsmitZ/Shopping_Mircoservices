@@ -45,7 +45,7 @@ public class BusMessageReceiver : IBusMessageReceiver
         while (!_cancellationTokenSource.Token.IsCancellationRequested)
         {
             _userRegisteredQueueUrl ??= (await _sqsClient.GetQueueUrlAsync(_awsOptions.UserRegistrationQueue)).QueueUrl;
-            // TODO: Receive message for user registered
+            await ReceiveMessageAsync<UserDto>(_userRegisteredQueueUrl);
             await Task.Delay(TimeSpan.FromSeconds(2), _cancellationTokenSource.Token);
         }
     }

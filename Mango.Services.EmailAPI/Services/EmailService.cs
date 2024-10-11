@@ -6,8 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Mango.Services.EmailAPI.Services;
 
-public class EmailService(DbContextOptions<AppDbContext> dbOptions) : IEmailService
+public class EmailService : IEmailService
 {
+    private readonly DbContextOptions<AppDbContext> _dbOptions;
+
+    public EmailService(DbContextOptions<AppDbContext> dbOptions)
+    {
+        ArgumentNullException.ThrowIfNull(dbOptions);
+        _dbOptions = dbOptions;
+    }
+
     public async Task<bool> SendAndLogEmail<T>(T emailBody)
     {
         var emailContent = GenerateEmail(emailBody);
@@ -17,7 +25,7 @@ public class EmailService(DbContextOptions<AppDbContext> dbOptions) : IEmailServ
 
     private async Task<bool> SendAndLogEmail(EmailLogger emailContent)
     {
-        await using var dbContext = new AppDbContext(dbOptions);
+        await using var dbContext = new AppDbContext(_dbOptions);
         dbContext.EmailLoggers.Add(emailContent);
         return await dbContext.SaveChangesAsync() > 0;
     }
@@ -31,7 +39,10 @@ public class EmailService(DbContextOptions<AppDbContext> dbOptions) : IEmailServ
             return BuildCartEmail(cartDto);
         }
 
-        //TODO: Add user registered email template
+        if (dto is UserDto userDto)
+        {
+            return BuildUserRegisteredEmail(userDto);
+        }
 
         throw new InvalidOperationException($"Unsupported email type {dto.GetType()}");
     }
@@ -66,6 +77,34 @@ public class EmailService(DbContextOptions<AppDbContext> dbOptions) : IEmailServ
         {
             Id = Guid.NewGuid().ToString(),
             Email = cartDto.CartHeader.Email,
+            Message = message,
+            Timestamp = DateTime.UtcNow
+        };
+    }
+    
+    private static EmailLogger BuildUserRegisteredEmail(UserDto userDto)
+    {
+        ArgumentNullException.ThrowIfNull(userDto);
+
+        if (string.IsNullOrWhiteSpace(userDto.Email))
+        {
+            throw new InvalidOperationException("User email should not be null");
+        }
+
+        var sb = new StringBuilder();
+        sb.Append("<html><body>");
+        sb.Append($"<h1>{userDto.Name} registered as a user</h1>");
+        sb.Append("<hr/>");
+        sb.Append($"<div>Email: {userDto.Email}</div>");
+        sb.Append($"<div>Phone Number: {userDto.PhoneNumber}</div>");
+        sb.Append("<hr/>");
+        sb.Append("</body></html>");
+        var message = sb.ToString();
+
+        return new EmailLogger
+        {
+            Id = Guid.NewGuid().ToString(),
+            Email = userDto.Email,
             Message = message,
             Timestamp = DateTime.UtcNow
         };
