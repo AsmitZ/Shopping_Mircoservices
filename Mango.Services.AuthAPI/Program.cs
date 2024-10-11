@@ -2,8 +2,10 @@ using Mango.Services.AuthAPI.Data;
 using Mango.Services.AuthAPI.Model;
 using Mango.Services.AuthAPI.Service;
 using Mango.Services.AuthAPI.Service.IService;
+using MessageBus;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("AppSettings:JwtOptions"));
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("AWSConfig"));
+builder.Services.AddTransient<IMessageBus, MessageBus.MessageBus>(provider =>
+{
+    var awsConfig = provider.GetRequiredService<IOptions<AwsOptions>>()?.Value;
+    if (awsConfig == null)
+    {
+        throw new InvalidOperationException("Aws config is missing");
+    }
+
+    return new MessageBus.MessageBus(awsConfig);
+});
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 builder.Services.AddAuthentication();
