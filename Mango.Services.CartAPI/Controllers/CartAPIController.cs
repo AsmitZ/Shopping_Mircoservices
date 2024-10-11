@@ -6,6 +6,7 @@ using Mango.Services.CartAPI.Services.IServices;
 using MessageBus;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Mango.Services.CartAPI.Controllers;
 
@@ -18,16 +19,25 @@ public class CartAPIController : ControllerBase
     private readonly IMessageBus _messageBus;
     private readonly IProductService _productService;
     private readonly ICouponService _couponService;
+    private readonly AwsOptions _awsOptions;
     private ResponseDto _response;
 
     public CartAPIController(IMapper mapper, AppDbContext db, IProductService productService,
-        ICouponService couponService, IMessageBus messageBus)
+        ICouponService couponService, IMessageBus messageBus, IOptions<AwsOptions> awsOptions)
     {
+        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(db);
+        ArgumentNullException.ThrowIfNull(productService);
+        ArgumentNullException.ThrowIfNull(couponService);
+        ArgumentNullException.ThrowIfNull(messageBus);
+        ArgumentNullException.ThrowIfNull(awsOptions);
+        
         _mapper = mapper;
         _db = db;
         _productService = productService;
         _couponService = couponService;
         _messageBus = messageBus;
+        _awsOptions = awsOptions.Value;
         _response = new ResponseDto();
     }
 
@@ -187,7 +197,7 @@ public class CartAPIController : ControllerBase
     {
         try
         {
-            await _messageBus.PublishMessage(cartDto);
+            await _messageBus.PublishMessage(cartDto, _awsOptions.ShoppingQueue);
             _response.Message = "Message published successfully";
             _response.IsSuccess = true;
         }

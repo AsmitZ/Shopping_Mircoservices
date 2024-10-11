@@ -38,6 +38,7 @@ builder.Services
     .AddHttpClient("CouponAPI", 
         client => client.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CouponAPI"]))
     .AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
+builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection("AWSConfig"));
 
 builder.Services.AddScoped<IMessageBus>(provider =>
 {

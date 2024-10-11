@@ -4,22 +4,36 @@ namespace Mango.Services.EmailAPI.Extensions;
 
 public static class ApplicationBuilderExtensions
 {
-    public static IApplicationBuilder UseAwsListener(this IApplicationBuilder app)
+    public static void UseAwsListener(this IApplicationBuilder app)
     {
         var bus = app.ApplicationServices.GetRequiredService<IBusMessageReceiver>();
         var applicationHostLifetime = app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>();
 
-        applicationHostLifetime.ApplicationStarted.Register(OnStart);
+        applicationHostLifetime.ApplicationStarted.Register(ShoppingQueueListener);
+        applicationHostLifetime.ApplicationStopping.Register(UserRegisteredQueueListener);
         applicationHostLifetime.ApplicationStopping.Register(OnStop);
 
-        return app;
+        return;
 
         void OnStop() => bus.Stop();
-        async void OnStart()
+
+        async void ShoppingQueueListener()
         {
             try
             {
-                await bus.Start();
+                await bus.ReceiveFromShoppingQueue();
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("Operation was canceled.");
+            }
+        }
+
+        async void UserRegisteredQueueListener()
+        {
+            try
+            {
+                await bus.ReceiveFromUserRegisteredQueue();
             }
             catch (OperationCanceledException)
             {

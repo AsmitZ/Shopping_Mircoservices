@@ -6,25 +6,45 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Mango.Services.EmailAPI.Services;
 
-public class EmailService : IEmailService
+public class EmailService(DbContextOptions<AppDbContext> dbOptions) : IEmailService
 {
-    private readonly DbContextOptions<AppDbContext> _dbOptions;
-
-    public EmailService(DbContextOptions<AppDbContext> dbOptions)
+    public async Task<bool> SendAndLogEmail<T>(T emailBody)
     {
-        _dbOptions = dbOptions;
+        var emailContent = GenerateEmail(emailBody);
+
+        return await SendAndLogEmail(emailContent);
     }
 
-    public async Task<bool> SendAndLogEmail(CartDto cartDto)
+    private async Task<bool> SendAndLogEmail(EmailLogger emailContent)
     {
-        var emailContent = GenerateEmailContent(cartDto);
-        await using var dbContext = new AppDbContext(_dbOptions);
+        await using var dbContext = new AppDbContext(dbOptions);
         dbContext.EmailLoggers.Add(emailContent);
         return await dbContext.SaveChangesAsync() > 0;
     }
 
-    private EmailLogger GenerateEmailContent(CartDto cartDto)
+    private EmailLogger GenerateEmail<T>(T dto)
     {
+        ArgumentNullException.ThrowIfNull(dto);
+
+        if (dto is CartDto cartDto)
+        {
+            return BuildCartEmail(cartDto);
+        }
+
+        //TODO: Add user registered email template
+
+        throw new InvalidOperationException($"Unsupported email type {dto.GetType()}");
+    }
+
+    private static EmailLogger BuildCartEmail(CartDto cartDto)
+    {
+        ArgumentNullException.ThrowIfNull(cartDto);
+
+        if (string.IsNullOrWhiteSpace(cartDto.CartHeader.Email))
+        {
+            throw new InvalidOperationException("Cart email should not be null");
+        }
+
         var sb = new StringBuilder();
         sb.Append("<html><body>");
         sb.Append("<h1>Your Order Details</h1>");

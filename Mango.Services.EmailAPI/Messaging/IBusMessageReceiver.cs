@@ -6,7 +6,13 @@ public interface IBusMessageReceiver
    /// A method to start the message receiver
    /// </summary>
    /// <returns></returns>
-   Task Start();
+   Task ReceiveFromShoppingQueue();
+   
+   /// <summary>
+   /// A method to start the message receiver
+   /// </summary>
+   /// <returns></returns>
+   Task ReceiveFromUserRegisteredQueue();
    
    /// <summary>
    /// A method to stop the message receiver
