@@ -21,7 +21,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("AppSettings:JwtOptions"));
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("AWSConfig"));
+builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection("AWSConfig"));
 builder.Services.AddTransient<IMessageBus, MessageBus.MessageBus>(provider =>
 {
     var awsConfig = provider.GetRequiredService<IOptions<AwsOptions>>()?.Value;

@@ -10,7 +10,7 @@ public static class ApplicationBuilderExtensions
         var applicationHostLifetime = app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>();
 
         applicationHostLifetime.ApplicationStarted.Register(ShoppingQueueListener);
-        applicationHostLifetime.ApplicationStopping.Register(UserRegisteredQueueListener);
+        applicationHostLifetime.ApplicationStarted.Register(UserRegisteredQueueListener);
         applicationHostLifetime.ApplicationStopping.Register(OnStop);
 
         return;
