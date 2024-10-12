@@ -30,7 +30,7 @@ public class OrderAPIController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("CreateOrder")]
+    [HttpPost]
     public async Task<ResponseDto> CreateOrder([FromBody] CartDto cartDto)
     {
         try
