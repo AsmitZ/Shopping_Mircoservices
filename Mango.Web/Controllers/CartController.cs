@@ -10,22 +10,49 @@ namespace Mango.Web.Controllers;
 public class CartController : Controller
 {
     private readonly ICartService _cartService;
-    
-    public CartController(ICartService cartService)
+    private readonly IOrderService _orderService;
+
+    public CartController(ICartService cartService, IOrderService orderService)
     {
+        ArgumentNullException.ThrowIfNull(cartService);
+        ArgumentNullException.ThrowIfNull(orderService);
+
         _cartService = cartService;
+        _orderService = orderService;
     }
-    
+
     [Authorize]
     public async Task<IActionResult> CartIndex()
     {
         return View(await LoadCartDtoBasedOnLoggedInUser());
     }
-    
+
     [Authorize]
     public async Task<IActionResult> Checkout()
     {
         return View(await LoadCartDtoBasedOnLoggedInUser());
+    }
+
+    [HttpPost]
+    [ActionName("Checkout")]
+    public async Task<IActionResult> Checkout(CartDto cartDto)
+    {
+        CartDto cart = await LoadCartDtoBasedOnLoggedInUser();
+        cart.CartHeader.Phone = cartDto.CartHeader.Phone;
+        cart.CartHeader.Email = cartDto.CartHeader.Email;
+        cart.CartHeader.Name = cartDto.CartHeader.Name;
+
+        var response = await _orderService.CreateOrderAsync(cart);
+
+        if (response == null || !response.IsSuccess)
+        {
+            TempData["error"] = "Order creation failed";
+            return View(cart);
+        }
+
+        var orderHeaderDto = JsonConvert.DeserializeObject<OrderHeaderDto>(Convert.ToString(response.Result));
+
+        return View();
     }
 
     public async Task<IActionResult> Remove(int cartDetailsId)
@@ -39,7 +66,7 @@ public class CartController : Controller
 
         return View();
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> ApplyCoupon(string userId, string couponCode)
     {
@@ -65,7 +92,7 @@ public class CartController : Controller
 
         return View();
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> EmailCart(CartDto cartDto)
     {
@@ -86,14 +113,14 @@ public class CartController : Controller
 
         var email = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Email)?.FirstOrDefault()?.Value;
         cartDto.CartHeader.Email = email;
-        
+
         var response = await _cartService.EmailCartAsync(cartDto);
         if (response != null && response.IsSuccess)
         {
             TempData["success"] = "Email will be processed and sent shortly";
             return RedirectToAction(nameof(CartIndex));
         }
-        
+
         TempData["error"] = "Email processing failed";
         return RedirectToAction(nameof(CartIndex));
     }
