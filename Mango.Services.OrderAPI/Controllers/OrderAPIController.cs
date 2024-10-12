@@ -36,13 +36,12 @@ public class OrderAPIController : ControllerBase
         try
         {
             var orderHeaderDto = _mapper.Map<OrderHeaderDto>(cartDto.CartHeader);
-            orderHeaderDto.UserId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            orderHeaderDto.UserId = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
             orderHeaderDto.Status = SD.Status.Pending;
             orderHeaderDto.OrderTime = DateTime.Now;
             orderHeaderDto.OrderDetails = _mapper.Map<List<OrderDetailsDto>>(cartDto.CartDetails);
 
             var createdOrder = _dbContext.OrderHeaders.Add(_mapper.Map<OrderHeader>(orderHeaderDto)).Entity;
-            _dbContext.OrderHeaders.Add(_mapper.Map<OrderHeader>(orderHeaderDto));
             await _dbContext.SaveChangesAsync();
 
             orderHeaderDto.OrderHeaderId = createdOrder.OrderHeaderId;
