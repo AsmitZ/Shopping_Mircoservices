@@ -66,8 +66,18 @@ public class OrderAPIController : ControllerBase
             Mode = "payment",
             SuccessUrl = paymentRequestDto.OnSuccessUrl,
             CancelUrl = paymentRequestDto.OnCancelUrl,
-            LineItems = new List<SessionLineItemOptions>()
+            LineItems = [],
+            Discounts = []
         };
+
+        if (paymentRequestDto.OrderHeader.Discount > 0)
+        {
+            var discount = new SessionDiscountOptions
+            {
+                Coupon = paymentRequestDto.OrderHeader.CouponCode,
+            };
+            options.Discounts.Add(discount);
+        }
 
         foreach (var orderItem in paymentRequestDto.OrderHeader.OrderDetails)
         {
