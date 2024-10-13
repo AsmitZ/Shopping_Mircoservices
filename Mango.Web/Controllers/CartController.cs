@@ -55,6 +55,11 @@ public class CartController : Controller
         return View();
     }
 
+    public async Task<IActionResult> Confirmation(int orderId)
+    {
+        return View(orderId);
+    }
+
     public async Task<IActionResult> Remove(int cartDetailsId)
     {
         var response = await _cartService.RemoveFromCartAsync(cartDetailsId);
