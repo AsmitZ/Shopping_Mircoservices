@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 namespace Mango.Services.CartAPI.Controllers;
 
 [ApiController]
-[Route("api/cart")]
+[Route("api/carts")]
 public class CartAPIController : ControllerBase
 {
     private readonly IMapper _mapper;
@@ -31,7 +31,7 @@ public class CartAPIController : ControllerBase
         ArgumentNullException.ThrowIfNull(couponService);
         ArgumentNullException.ThrowIfNull(messageBus);
         ArgumentNullException.ThrowIfNull(awsOptions);
-        
+
         _mapper = mapper;
         _db = db;
         _productService = productService;
@@ -41,7 +41,7 @@ public class CartAPIController : ControllerBase
         _response = new ResponseDto();
     }
 
-    [HttpGet("GetCart/{userId}")]
+    [HttpGet("{userId}")]
     public async Task<ActionResult<ResponseDto>> GetCart(string userId)
     {
         try
@@ -88,7 +88,7 @@ public class CartAPIController : ControllerBase
         return _response;
     }
 
-    [HttpPost("CartUpsert")]
+    [HttpPut]
     public async Task<ActionResult<ResponseDto>> Upsert([FromBody] CartDto cartDto)
     {
         try
@@ -140,10 +140,11 @@ public class CartAPIController : ControllerBase
             _response.IsSuccess = false;
             _response.Message = e.Message;
         }
+
         return _response;
     }
 
-    [HttpPost("RemoveCart/{cartDetailId}")]
+    [HttpDelete("{cartDetailId}")]
     public async Task<ActionResult<ResponseDto>> RemoveCart(int cartDetailId)
     {
         try
@@ -171,10 +172,11 @@ public class CartAPIController : ControllerBase
             _response.IsSuccess = false;
             _response.Message = e.Message;
         }
+
         return _response;
     }
 
-    [HttpPut("ApplyCoupon/{userId}/{couponCode}")]
+    [HttpPut("coupon/apply/{userId}/{couponCode}")]
     public async Task<ActionResult<ResponseDto>> ApplyCoupon([FromRoute] string userId, [FromRoute] string couponCode)
     {
         var cartFromDb = await _db.CartHeaders.FirstAsync(cart => cart.UserId == userId);
@@ -186,13 +188,30 @@ public class CartAPIController : ControllerBase
         cartFromDb.CouponCode = couponCode;
         _db.CartHeaders.Update(cartFromDb);
         await _db.SaveChangesAsync();
-        
+
         _response.Message = "Coupon applied successfully";
         _response.Result = cartFromDb;
         return _response;
     }
 
-    [HttpPost("EmailCartRequest")]
+    [HttpPut("coupon/remove/{userId}")]
+    public async Task<ActionResult<ResponseDto>> RemoveCoupon([FromRoute] string userId)
+    {
+        var cartFromDb = await _db.CartHeaders.FirstAsync(cart => cart.UserId == userId);
+        if (cartFromDb is null)
+        {
+            return BadRequest("Unable to find shopping cart");
+        }
+
+        cartFromDb.CouponCode = "";
+        _db.CartHeaders.Update(cartFromDb);
+        await _db.SaveChangesAsync();
+
+        _response.Message = "Coupon removed successfully";
+        return _response;
+    }
+
+    [HttpPost("email")]
     public async Task<object> EmailCartRequest([FromBody] CartDto cartDto)
     {
         try
@@ -206,41 +225,7 @@ public class CartAPIController : ControllerBase
             _response.IsSuccess = false;
             _response.Message = ex.Message;
         }
-        return _response;
-    }
 
-    [HttpPut("RemoveCoupon/{userId}")]
-    public async Task<ActionResult<ResponseDto>> RemoveCoupon([FromRoute] string userId)
-    {
-        var cartFromDb = await _db.CartHeaders.FirstAsync(cart => cart.UserId == userId);
-        if (cartFromDb is null)
-        {
-            return BadRequest("Unable to find shopping cart");
-        }
-
-        cartFromDb.CouponCode = "";
-        _db.CartHeaders.Update(cartFromDb);
-        await _db.SaveChangesAsync();
-        
-        _response.Message = "Coupon removed successfully";
         return _response;
     }
 }
-
-// {
-//     "cartHeader": {
-//         "cartHeaderId": 0,
-//         "userId": "string",
-//         "couponCode": "string",
-//         "cartTotal": 0,
-//         "discount": 0
-//     },
-//     "cartDetails": [
-//     {
-//         "cartDetailsId": 0,
-//         "cartHeaderId": 0,
-//         "productId": 0,
-//         "count": 0
-//     }
-//     ]
-// }

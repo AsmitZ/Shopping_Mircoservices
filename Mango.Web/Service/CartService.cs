@@ -9,55 +9,62 @@ using ApiType = SD.ApiType;
 public class CartService : ICartService
 {
     private readonly IBaseService _baseService;
+
     public CartService(IBaseService baseService)
     {
+        ArgumentNullException.ThrowIfNull(baseService);
         _baseService = baseService;
     }
 
     public async Task<ResponseDto?> GetCartByUserIdAsync(string userId)
     {
-        return await _baseService.SendAsync(new RequestDto
+        var responseDto = await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.GET,
-            Url = SD.ShoppingCartApiBase + "api/cart/GetCart/" + userId
+            Url = SD.ShoppingCartApiBase + "api/carts/" + userId
         });
+        return responseDto;
     }
 
     public async Task<ResponseDto?> UpsertCartAsync(CartDto cartDto)
     {
-        return await _baseService.SendAsync(new RequestDto
+        var responseDto = await _baseService.SendAsync(new RequestDto
         {
-            ApiType = ApiType.POST,
+            ApiType = ApiType.PUT,
             Data = cartDto,
-            Url = SD.ShoppingCartApiBase + "api/cart/CartUpsert"
+            Url = SD.ShoppingCartApiBase + "api/carts"
         });
+        return responseDto;
     }
 
     public async Task<ResponseDto?> RemoveFromCartAsync(int cartDetailsId)
     {
-        return await _baseService.SendAsync(new RequestDto
+        var responseDto = await _baseService.SendAsync(new RequestDto
         {
-            ApiType = ApiType.POST,
-            Url = SD.ShoppingCartApiBase + "api/cart/RemoveCart/" + cartDetailsId
+            ApiType = ApiType.DELETE,
+            Url = SD.ShoppingCartApiBase + "api/carts/" + cartDetailsId
         });
+        return responseDto;
     }
 
     public async Task<ResponseDto?> ApplyCouponAsync(string userId, string couponCode)
     {
-        return await _baseService.SendAsync(new RequestDto
+        var responseDto = await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.PUT,
-            Url = SD.ShoppingCartApiBase + "api/cart/ApplyCoupon/" + userId + "/" + couponCode
+            Url = SD.ShoppingCartApiBase + "api/carts/coupon/apply/" + userId + "/" + couponCode
         });
+        return responseDto;
     }
-    
+
     public async Task<ResponseDto?> RemoveCouponAsync(string userId)
     {
-        return await _baseService.SendAsync(new RequestDto
+        var responseDto = await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.PUT,
-            Url = SD.ShoppingCartApiBase + "api/cart/RemoveCoupon/" + userId
+            Url = SD.ShoppingCartApiBase + "api/carts/coupon/remove/" + userId
         });
+        return responseDto;
     }
 
     public async Task<ResponseDto?> EmailCartAsync(CartDto cartDto)
@@ -66,7 +73,7 @@ public class CartService : ICartService
         {
             ApiType = ApiType.POST,
             Data = cartDto,
-            Url = SD.ShoppingCartApiBase + "api/cart/EmailCartRequest"
+            Url = SD.ShoppingCartApiBase + "api/carts/email"
         });
         return responseDto;
     }
