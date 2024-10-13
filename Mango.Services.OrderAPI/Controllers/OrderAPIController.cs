@@ -17,7 +17,7 @@ public class OrderAPIController : ControllerBase
     private readonly IMapper _mapper;
     private ResponseDto _response;
 
-    public OrderAPIController(AppDbContext dbContext, Mapper mapper)
+    public OrderAPIController(AppDbContext dbContext, IMapper mapper)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(mapper);

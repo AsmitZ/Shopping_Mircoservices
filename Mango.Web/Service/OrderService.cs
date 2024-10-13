@@ -21,7 +21,7 @@ public class OrderService : IOrderService
         var responseDto = await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.POST,
-            Url = SD.OrderApiBase + "api/orders/",
+            Url = SD.OrderApiBase + "api/orders",
             Data = cartDto
         });
 
