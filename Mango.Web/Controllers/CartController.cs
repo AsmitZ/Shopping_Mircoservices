@@ -1,5 +1,6 @@
 using Mango.Web.Models;
 using Mango.Web.Service.IService;
+using Mango.Web.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -76,6 +77,20 @@ public class CartController : Controller
 
     public async Task<IActionResult> Confirmation(int orderId)
     {
+        var response = await _orderService.ValidateSessionAsync(orderId);
+        if (response == null || !response.IsSuccess)
+        {
+            // TODO: redirect to error page
+            return View(orderId);
+        }
+
+        var orderHeader = JsonConvert.DeserializeObject<OrderHeaderDto>(Convert.ToString(response.Result));
+        if (orderHeader != null && orderHeader.Status == SD.Status.Approved)
+        {
+            return View(orderId);
+        }
+
+        // TODO: redirect to error page
         return View(orderId);
     }
 

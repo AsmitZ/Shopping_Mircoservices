@@ -39,4 +39,16 @@ public class OrderService : IOrderService
 
         return responseDto;
     }
+
+    public async Task<ResponseDto?> ValidateSessionAsync(int orderHeaderId)
+    {
+        var responseDto = await _baseService.SendAsync(new RequestDto
+        {
+            ApiType = ApiType.POST,
+            Url = SD.OrderApiBase + "api/order/session/validate",
+            Data = orderHeaderId
+        });
+
+        return responseDto;
+    }
 }
