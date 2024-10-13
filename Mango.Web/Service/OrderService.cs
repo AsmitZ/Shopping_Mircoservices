@@ -21,7 +21,7 @@ public class OrderService : IOrderService
         var responseDto = await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.POST,
-            Url = SD.OrderApiBase + "api/order/",
+            Url = SD.OrderApiBase + "api/orders/",
             Data = cartDto
         });
 
@@ -33,7 +33,7 @@ public class OrderService : IOrderService
         var responseDto = await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.POST,
-            Url = SD.OrderApiBase + "api/order/session",
+            Url = SD.OrderApiBase + "api/orders/session",
             Data = request
         });
 
@@ -45,7 +45,7 @@ public class OrderService : IOrderService
         var responseDto = await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.POST,
-            Url = SD.OrderApiBase + "api/order/session/validate",
+            Url = SD.OrderApiBase + "api/orders/session/validate",
             Data = orderHeaderId
         });
 

@@ -2,7 +2,6 @@ using AutoMapper;
 using Mango.Services.OrderAPI.Data;
 using Mango.Services.OrderAPI.Models;
 using Mango.Services.OrderAPI.Models.Dto;
-using Mango.Services.OrderAPI.Services.IServices;
 using Mango.Services.OrderAPI.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,22 +10,19 @@ using Stripe.Checkout;
 
 namespace Mango.Services.OrderAPI.Controllers;
 
-[Route("api/order")]
+[Route("api/orders")]
 public class OrderAPIController : ControllerBase
 {
     private readonly AppDbContext _dbContext;
-    private readonly IProductService _productService;
     private readonly IMapper _mapper;
     private ResponseDto _response;
 
-    public OrderAPIController(AppDbContext dbContext, IProductService productService, IMapper mapper)
+    public OrderAPIController(AppDbContext dbContext, Mapper mapper)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
-        ArgumentNullException.ThrowIfNull(productService);
         ArgumentNullException.ThrowIfNull(mapper);
 
         _dbContext = dbContext;
-        _productService = productService;
         _mapper = mapper;
         _response = new ResponseDto();
     }
