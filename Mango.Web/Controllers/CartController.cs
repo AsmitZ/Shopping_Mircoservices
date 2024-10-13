@@ -52,7 +52,26 @@ public class CartController : Controller
 
         var orderHeaderDto = JsonConvert.DeserializeObject<OrderHeaderDto>(Convert.ToString(response.Result));
 
-        return View();
+        var domain = $"{Request.Scheme}://{Request.Host.Value}";
+        var paymentRequestDto = new PaymentRequestDto
+        {
+            OrderHeader = orderHeaderDto,
+            OnCancelUrl = $"{domain}/cart/Checkout",
+            OnSuccessUrl = $"{domain}/cart/Confirmation?orderId={orderHeaderDto.OrderHeaderId}"
+        };
+        var paymentResponse = await _orderService.CreateSessionAsync(paymentRequestDto);
+
+        if (paymentResponse == null || !paymentResponse.IsSuccess)
+        {
+            TempData["error"] = "Payment session creation failed";
+            return View(cart);
+        }
+
+        var paymentResponseDto =
+            JsonConvert.DeserializeObject<PaymentRequestDto>(Convert.ToString(paymentResponse.Result));
+        Response.Headers.Append("Location", paymentResponseDto.SessionUrl);
+
+        return new StatusCodeResult(303);
     }
 
     public async Task<IActionResult> Confirmation(int orderId)

@@ -6,6 +6,7 @@ using Mango.Services.OrderAPI.Services.IServices;
 using Mango.Services.OrderAPI.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe.Checkout;
 
 namespace Mango.Services.OrderAPI.Controllers;
 
@@ -53,6 +54,49 @@ public class OrderAPIController : ControllerBase
             _response.Message = e.Message;
         }
 
+        return _response;
+    }
+
+    [Authorize]
+    [HttpPost("session")]
+    public async Task<ResponseDto> CreatePaymentSession([FromBody] PaymentRequestDto paymentRequestDto)
+    {
+        var options = new SessionCreateOptions
+        {
+            Mode = "payment",
+            SuccessUrl = paymentRequestDto.OnSuccessUrl,
+            CancelUrl = paymentRequestDto.OnCancelUrl,
+            LineItems = new List<SessionLineItemOptions>()
+        };
+
+        foreach (var orderItem in paymentRequestDto.OrderHeader.OrderDetails)
+        {
+            var sessionLineItem = new SessionLineItemOptions
+            {
+                PriceData = new SessionLineItemPriceDataOptions
+                {
+                    Currency = "usd",
+                    UnitAmount = (long)orderItem.ProductPrice * 100,
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = orderItem.Product.Name,
+                    },
+                },
+                Quantity = orderItem.Count,
+            };
+
+            options.LineItems.Add(sessionLineItem);
+        }
+
+        var service = new SessionService();
+        Session session = await service.CreateAsync(options);
+        paymentRequestDto.SessionUrl = session.Url;
+        paymentRequestDto.SessionId = session.Id;
+        OrderHeader orderHeader =
+            _dbContext.OrderHeaders.First(o => o.OrderHeaderId == paymentRequestDto.OrderHeader.OrderHeaderId);
+        orderHeader.StripeSessionId = session.Id;
+        await _dbContext.SaveChangesAsync();
+        _response.Result = paymentRequestDto;
         return _response;
     }
 }

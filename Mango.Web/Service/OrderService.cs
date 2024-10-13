@@ -18,11 +18,25 @@ public class OrderService : IOrderService
 
     public async Task<ResponseDto?> CreateOrderAsync(CartDto cartDto)
     {
-        return await _baseService.SendAsync(new RequestDto
+        var responseDto = await _baseService.SendAsync(new RequestDto
         {
             ApiType = ApiType.POST,
             Url = SD.OrderApiBase + "api/order/",
             Data = cartDto
         });
+
+        return responseDto;
+    }
+
+    public async Task<ResponseDto?> CreateSessionAsync(PaymentRequestDto request)
+    {
+        var responseDto = await _baseService.SendAsync(new RequestDto
+        {
+            ApiType = ApiType.POST,
+            Url = SD.OrderApiBase + "api/order/session",
+            Data = request
+        });
+
+        return responseDto;
     }
 }
