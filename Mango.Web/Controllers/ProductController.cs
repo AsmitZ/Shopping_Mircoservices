@@ -33,19 +33,18 @@ public class ProductController : Controller
         Console.WriteLine("Rendering ProductIndex view...");
         return View(products);
     }
-    
+
     public async Task<IActionResult> ProductCreate()
     {
         Console.WriteLine("Rendering ProductCreate view...");
         return View();
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> ProductCreate(ProductDto productDto)
     {
         if (!ModelState.IsValid)
         {
-            TempData["Error"] = "Invalid product data.";
             return View(productDto);
         }
 
@@ -57,6 +56,7 @@ public class ProductController : Controller
                 Console.WriteLine("Product created successfully.");
                 return RedirectToAction(nameof(ProductIndex));
             }
+
             TempData["Error"] = response?.Message;
         }
         catch (Exception e)
@@ -67,9 +67,14 @@ public class ProductController : Controller
 
         return View(productDto);
     }
-    
+
     public async Task<IActionResult> ProductEdit(long productId)
     {
+        if (!ModelState.IsValid)
+        {
+            return RedirectToAction(nameof(ProductIndex));
+        }
+
         try
         {
             var response = await _productService.GetProductByIdAsync(productId);
@@ -85,10 +90,10 @@ public class ProductController : Controller
             Console.WriteLine(e);
             TempData["Error"] = e.Message;
         }
-        
+
         return RedirectToAction(nameof(ProductIndex));
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> ProductEdit(ProductDto productDto)
     {
@@ -108,7 +113,7 @@ public class ProductController : Controller
         TempData["Error"] = response?.Message;
         return View(productDto);
     }
-    
+
     public async Task<IActionResult> ProductDelete(long productId)
     {
         try
@@ -120,6 +125,7 @@ public class ProductController : Controller
                     Convert.ToString(response.Result) ?? string.Empty);
                 return View(productDto);
             }
+
             TempData["Error"] = response?.Message;
         }
         catch (Exception e)
@@ -127,10 +133,10 @@ public class ProductController : Controller
             Console.WriteLine(e);
             TempData["Error"] = e.Message;
         }
-        
+
         return RedirectToAction(nameof(ProductIndex));
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> ProductDelete(ProductDto productDto)
     {
@@ -143,6 +149,7 @@ public class ProductController : Controller
                 TempData["Success"] = "Product deleted successfully.";
                 return RedirectToAction(nameof(ProductIndex));
             }
+
             TempData["Error"] = response?.Message;
         }
         catch (Exception e)
@@ -150,7 +157,7 @@ public class ProductController : Controller
             Console.WriteLine(e);
             TempData["Error"] = e.Message;
         }
-        
+
         return RedirectToAction(nameof(ProductIndex));
     }
 }
