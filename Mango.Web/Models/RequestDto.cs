@@ -8,4 +8,5 @@ public class RequestDto
     public object Data { get; set; }
     public string Url { get; set; }
     public string AccessToken { get; set; }
+    public SD.ContentType ContentType { get; set; } = SD.ContentType.Json;
 }

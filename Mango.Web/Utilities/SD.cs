@@ -28,4 +28,11 @@ public class SD
         public const string Canceled = "Canceled";
         public const string Refunded = "Refunded";
     }
+
+    public enum ContentType
+    {
+        Json,
+        FormUrlEncoded,
+        MultipartFormData
+    }
 }

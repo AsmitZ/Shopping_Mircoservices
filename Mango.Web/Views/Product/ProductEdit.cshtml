@@ -1,11 +1,11 @@
 @model ProductDto
 
 <form asp-action="ProductEdit" enctype="multipart/form-data">
-    <br />
+    <br/>
     <div class="container border p-3">
         <h1 class="text-white text-center">Edit Product</h1>
-        <input hidden asp-for="ProductId" />
-        <hr />
+        <input hidden asp-for="ProductId"/>
+        <hr/>
         <div class="row">
             <div class="col-10">
                 <div class="row">
@@ -13,14 +13,14 @@
                         <label class="control-label pt-2" style="font-size:20px;"> Name</label>
                     </div>
                     <div class="col-10 pb-3">
-                        <input asp-for="Name" class="form-control" />
+                        <input asp-for="Name" class="form-control"/>
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
                     <div class="col-2">
                         <label class="control-label pt-2" style="font-size:20px;">Category Name</label>
                     </div>
                     <div class="col-10 pb-3">
-                        <input asp-for="Category" class="form-control" />
+                        <input asp-for="Category" class="form-control"/>
                         <span asp-validation-for="Category" class="text-danger"></span>
                     </div>
                     <div class="col-2">
@@ -34,17 +34,17 @@
                         <label class="control-label pt-2" style="font-size:20px;">Price</label>
                     </div>
                     <div class="col-10 pb-3">
-                        <input asp-for="Price" class="form-control" />
+                        <input asp-for="Price" class="form-control"/>
                         <span asp-validation-for="Price" class="text-danger"></span>
                     </div>
                     <div class="col-2">
                         <label class="control-label pt-2" style="font-size:20px;">ImageUrl</label>
                     </div>
                     <div class="col-10 pb-3">
-                        <input asp-for="ImageURL" class="form-control" />
-                        <input asp-for="ImageURL" hidden class="form-control" />
-                        @* <input asp-for="ImageLocalPath" hidden class="form-control" /> *@
-                        <span asp-validation-for="ImageURL" class="text-danger"></span>
+                        <input asp-for="Image" class="form-control" placeholder="Upload an image (optional)"/>
+                        <input asp-for="ImageURL" hidden class="form-control"/>
+                        <input asp-for="ImageLocalPath" hidden class="form-control"/>
+                        <span asp-validation-for="Image" class="text-danger"></span>
                     </div>
 
                     <div class="col-5 offset-2">
@@ -52,13 +52,13 @@
                         <a asp-action="ProductIndex" class="btn-primary btn form-control ">Back to List</a>
                     </div>
                     <div class="col-5">
-                        <input type="submit" value="Update" class="btn btn-success form-control" />
+                        <input type="submit" value="Update" class="btn btn-success form-control"/>
                     </div>
 
                 </div>
             </div>
             <div class="col-2">
-                <img src="@Model.ImageURL" class="w-100" alt="" />
+                <img src="@Model.ImageURL" class="w-100" alt=""/>
             </div>
         </div>
     </div>
@@ -66,5 +66,5 @@
 
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial"/>
 }

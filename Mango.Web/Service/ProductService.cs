@@ -26,12 +26,14 @@ public class ProductService(IBaseService baseService) : IProductService
 
     public async Task<ResponseDto?> CreateProductAsync(ProductDto productDto)
     {
-        return await baseService.SendAsync(new RequestDto
+        var responseDto = await baseService.SendAsync(new RequestDto
         {
             ApiType = SD.ApiType.POST,
             Url = SD.ProductApiBase + "api/products",
-            Data = productDto
+            Data = productDto,
+            ContentType = SD.ContentType.MultipartFormData
         });
+        return responseDto;
     }
 
     public async Task<ResponseDto?> UpdateProductAsync(ProductDto productDto)
@@ -40,7 +42,8 @@ public class ProductService(IBaseService baseService) : IProductService
         {
             ApiType = SD.ApiType.PUT,
             Url = SD.ProductApiBase + "api/products",
-            Data = productDto
+            Data = productDto,
+            ContentType = SD.ContentType.MultipartFormData
         });
     }
 
